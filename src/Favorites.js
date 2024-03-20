@@ -1,9 +1,6 @@
 import { GithubUser } from "./GithubUser.js"
 
 export class Favorites{
-    noUsers(){
-        console.log(this.entries)
-    }
     constructor(root){
         this.root = document.querySelector(root)
 
@@ -18,14 +15,14 @@ export class Favorites{
     }
     async add(username){
         try{
-            const userExist = this.entries.find(entry => entry.login === username)
+            const userExist = this.entries.find(entry => entry.login.toLowerCase() === username.toLowerCase())
             if(userExist){
-                throw new Error('Usuário já cadastrado')
+                throw new Error(`Usuário ${username} já focadastrado`)
             }
 
             const user = await GithubUser.search(username)
             if(user.login === undefined){
-                throw new Error('Usuário não encontrado!')
+                throw new Error(`Usuário ${username} não encontrado!`)
             }
             this.entries = [user, ...this.entries]
             this.update()
@@ -52,34 +49,57 @@ export class FavoritesView extends Favorites{
         this.update()
         this.onAdd()
     }
+    
     onAdd(){
         const addButton = this.root.querySelector('#search')
+        const search = this.root.querySelector("#input-search")
         addButton.onclick = () => {
             event.preventDefault()
             const {value} = this.root.querySelector("#input-search")
             this.add(value)
+            search.value = ''
         }
+    }
+    defaultNoUsers(){
+        const tr = document.createElement('tr')
+        tr.innerHTML = 
+        `
+            <tr >
+                <td id="no-users">
+                    <img src="./assets/Estrela.svg" alt="">
+                    <p>Nenhum favorito ainda</p>
+                </td>
+            </tr>
+        `
+        document.documentElement.classList.add('no-user')
+        return tr;
     }
     update(){
         this.removeAllTr()
-        this.entries.forEach(user => {
-            const row = this.createRow()
-            row.querySelector('.user img').src = `http://github.com/${user.login}.png`
-            row.querySelector('.user img').alt = `Imagem de ${user.name}`
-            row.querySelector('.user a').href = `http://github.com/${user.login}`
-            row.querySelector('.user p').textContent = user.name
-            row.querySelector('.user span').textContent = user.login
-            row.querySelector('.repositories').textContent = user.public_repos
-            row.querySelector('.followers').textContent = user.followers
-            row.querySelector('.action').onclick = () => {
-                const isOk = confirm('Tem certeza que deseja deletar essa linha?')
-                if(isOk){
-                    this.delete(user)
-                }
-            }
-
+        if(this.entries.length === 0){
+            const row = this.defaultNoUsers()
             this.tbody.append(row)
-        })
+        }else{
+            document.documentElement.classList.remove('no-user')
+            this.entries.forEach(user => {
+                const row = this.createRow()
+                row.querySelector('.user img').src = `http://github.com/${user.login}.png`
+                row.querySelector('.user img').alt = `Imagem de ${user.name}`
+                row.querySelector('.user a').href = `http://github.com/${user.login}`
+                row.querySelector('.user p').textContent = user.name
+                row.querySelector('.user span').textContent = user.login
+                row.querySelector('.repositories').textContent = user.public_repos
+                row.querySelector('.followers').textContent = user.followers
+                row.querySelector('.action').onclick = () => {
+                    const isOk = confirm('Tem certeza que deseja deletar essa linha?')
+                    if(isOk){
+                        this.delete(user)
+                    }
+                }
+    
+                this.tbody.append(row)
+            })
+        }
     }
     createRow(){
         const tr = document.createElement('tr')

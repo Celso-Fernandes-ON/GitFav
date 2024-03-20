@@ -84,6 +84,7 @@ table{
 }
 tbody{
     height: 50vh;
+    overflow-y: auto;
 }
 tr{
     display: grid;
@@ -94,24 +95,22 @@ tr:not(#tr-head){
     border: var(--turquoise-600) solid 1px;
     border-top: none;
 }
-.no-user #no-users{
-    display: none;
-}
-tr#no-users{
+.no-user tbody tr{
     grid-template-columns: 1fr;
 }
-tr#no-users td{
+#no-users {
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: center;
     gap: 6rem;
     height: 40rem;
+    width: 100%;
 }
-tr#no-users img{
+#no-users img{
     width: 13.2rem;
 }
-tr#no-users p{
+#no-users p{
     color: var(--gray-800);  
     font-size: 4rem;  
 }
